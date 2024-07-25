@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "boxicons": "^2.1.4",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-html": "^8.1.1",
+    "eslint-plugin-import": "^2.29.1",
+    "parcel": "^2.12.0",
+    "parcel-reporter-static-files-copy": "^1.5.3",
+    "prettier": "^3.3.3"
+  },
+  "name": "toggle-slide",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "parcel build index.html --dist-dir dist",
+    "dev": "parcel serve index.html"
+  },
+  "staticFiles": {
+    "staticPath": "star-rating",
+    "staticOutDir": "dist/star-rating"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
