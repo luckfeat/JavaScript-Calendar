@@ -48,9 +48,7 @@ export function getStartAndLastDate() {
   /* 달력에 추가될 요일 계산 */
   const dateDifference = getDateDifference(previousMonthDate, nextMonthDate);
   const startDate = previousMonthDate;
-  const lastDate = new Date(
-    year,
-    month + 1,
+  const lastDate = nextMonthDate.setDate(
     nextMonthDate.getDate() + dateDifference
   );
 
@@ -85,8 +83,6 @@ export function updatedCalendar() {
   const monthSpan = calendarSection.querySelector('.month');
   const yearSpan = calendarSection.querySelector('.year');
   const calendarContent = calendarSection.querySelector('.calendar-content');
-
-  console.log('hi');
 
   calendarContent.innerHTML = '';
   monthSpan.innerHTML = monthName;
