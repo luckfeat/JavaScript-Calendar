@@ -1,71 +1,102 @@
 import 'boxicons';
+import store, { increment, decrement } from './Store';
+
+export function getMonthAndYear() {
+  const { counter } = store.getState();
+  const now = new Date();
+  now.setMonth(now.getMonth() + counter);
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  return [month, year];
+}
 
 export function getDateDifference(startDate, endDate) {
+  const calendarSize = 42;
   const timeDifference = endDate - startDate;
   const dateDifference = timeDifference / (1000 * 60 * 60 * 24);
 
   return calendarSize - (dateDifference + 1);
 }
 
-export function getThisMonthArray() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const calendarSize = 42;
-  const firstDay = new Date(year, month);
-  const lastDay = new Date(year, month + 1, 0);
-  const firstDayOfWeek = firstDay.getDay();
-  const lastDayOfWeek = lastDay.getDay();
-  const previousMonthDate = new Date(year, month, 1 - firstDayOfWeek);
-  const nextMonthDate = new Date(year, month + 1, 7 - (lastDayOfWeek + 1));
+export function getStartAndLastDate() {
+  const [month, year] = getMonthAndYear();
+
+  /* This Month */
+  const firstDay = new Date(year, month).getDay();
+  const lastDay = new Date(year, month + 1, 0).getDay();
+
+  /* Previous, Next Month */
+  const previousMonthDate = new Date(year, month, 1 - firstDay);
+  const nextMonthDate = new Date(year, month + 1, 7 - (lastDay + 1));
+
+  /* 달력에 추가될 요일 계산 */
   const dateDifference = getDateDifference(previousMonthDate, nextMonthDate);
   const startDate = previousMonthDate;
-  const lastDate = new Date(year, month + 1, nextMonthDate.getDate() + 7);
+  const lastDate = new Date(
+    year,
+    month + 1,
+    nextMonthDate.getDate() + dateDifference
+  );
+
+  return [startDate, lastDate];
+}
+
+export function renderDateElements(tag) {
+  const [month] = getMonthAndYear();
+  const [startDate, lastDate] = getStartAndLastDate();
 
   let currentDate = startDate;
-  let calendarDateArray = [];
 
   while (currentDate <= lastDate) {
     const dayOfDate = currentDate.getDate();
-    calendarDateArray.push(dayOfDate);
+    const dateGrid = document.createElement('div');
+
+    dateGrid.className =
+      currentDate.getMonth() === month
+        ? 'calendar-item'
+        : 'calendar-item light';
+
+    dateGrid.textContent = dayOfDate.toString();
+    tag.appendChild(dateGrid);
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return calendarDateArray;
+  // calendarDateArray.forEach(date => {
+  //   const dateGrid = document.createElement('div');
+  //   dateGrid.className = 'calendar-item';
+  //   dateGrid.textContent = date;
+  //
+  //   tag.appendChild(dateGrid);
+  // });
 }
 
+export function updatedCalendar() {}
+
 export default function Calendar() {
-  const section = document.createElement('section');
-  const calendarInput = document.createElement('input');
-  const calendar = document.createElement('div');
+  const calendarSection = document.createElement('section');
   const calendarInnerHtml = `
-    <nav class="calendar-nav">
-      <box-icon class='left' type='solid' name='left-arrow' color='white' size='xs'></box-icon>
-      <div class='center'>
-        <span class='month'>${month}</span>
-        <span class='year'>${year}</span>
+    <input type='text' placeholder='Select Date'>
+    <div class='calendar hidden'>
+      <nav class="calendar-nav">
+        <box-icon class='left' type='solid' name='left-arrow' color='white' size='xs'></box-icon>
+        <div class='center'>
+          <span class='month'></span>
+          <span class='year'>year</span>
+        </div>
+        <box-icon class='right' type='solid' name='right-arrow' color='white' size='xs'></box-icon>
+      </nav>
+      <div class='calendar-content'>
       </div>
-      <box-icon class='right' type='solid' name='right-arrow' color='white' size='xs'></box-icon>
-    </nav>
-    <div class="calendar-content"></div>
+    </div>
   `;
 
-  Object.assign(calendarInput, {
-    type: 'text',
-    placeholder: 'Select Date',
-  });
+  calendarSection.innerHTML = calendarInnerHtml;
 
-  calendar.className = 'calendar hidden';
-  calendar.innerHTML = calendarInnerHtml;
+  const calendarInput = calendarSection.querySelector('input');
+  const calendarContent = calendarSection.querySelector('.calendar-content');
 
-  section.appendChild(calendarInput);
-  section.appendChild(calendar);
-
-  const calendarContent = document.querySelector('.calendar-content');
-
-  const dateArray = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-
-  dateArray.forEach(el => {});
+  renderDateElements(calendarContent);
 
   calendarInput.addEventListener('click', () => {
     const calendar = document.querySelector('.calendar');
@@ -77,5 +108,5 @@ export default function Calendar() {
   //   calendar.classList.add('hidden');
   // });
 
-  return section;
+  return calendarSection;
 }
