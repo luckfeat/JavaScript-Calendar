@@ -7,8 +7,23 @@ export function getMonthAndYear() {
   now.setMonth(now.getMonth() + counter);
   const month = now.getMonth();
   const year = now.getFullYear();
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const monthName = monthNames[month];
 
-  return [month, year];
+  return [month, year, monthName];
 }
 
 export function getDateDifference(startDate, endDate) {
@@ -61,19 +76,26 @@ export function renderDateElements(tag) {
     tag.appendChild(dateGrid);
     currentDate.setDate(currentDate.getDate() + 1);
   }
-
-  // calendarDateArray.forEach(date => {
-  //   const dateGrid = document.createElement('div');
-  //   dateGrid.className = 'calendar-item';
-  //   dateGrid.textContent = date;
-  //
-  //   tag.appendChild(dateGrid);
-  // });
 }
 
-export function updatedCalendar() {}
+export function updatedCalendar() {
+  const [month, year, monthName] = getMonthAndYear();
+
+  const calendarSection = document.querySelector('section');
+  const monthSpan = calendarSection.querySelector('.month');
+  const yearSpan = calendarSection.querySelector('.year');
+  const calendarContent = calendarSection.querySelector('.calendar-content');
+
+  console.log('hi');
+
+  calendarContent.innerHTML = '';
+  monthSpan.innerHTML = monthName;
+  yearSpan.innerHTML = year.toString();
+  renderDateElements(calendarContent);
+}
 
 export default function Calendar() {
+  const [month, year, monthName] = getMonthAndYear();
   const calendarSection = document.createElement('section');
   const calendarInnerHtml = `
     <input type='text' placeholder='Select Date'>
@@ -81,8 +103,8 @@ export default function Calendar() {
       <nav class="calendar-nav">
         <box-icon class='left' type='solid' name='left-arrow' color='white' size='xs'></box-icon>
         <div class='center'>
-          <span class='month'></span>
-          <span class='year'>year</span>
+          <span class='month'>${monthName}</span>
+          <span class='year'>${year}</span>
         </div>
         <box-icon class='right' type='solid' name='right-arrow' color='white' size='xs'></box-icon>
       </nav>
@@ -94,6 +116,7 @@ export default function Calendar() {
   calendarSection.innerHTML = calendarInnerHtml;
 
   const calendarInput = calendarSection.querySelector('input');
+  const calendarNav = calendarSection.querySelector('.calendar-nav');
   const calendarContent = calendarSection.querySelector('.calendar-content');
 
   renderDateElements(calendarContent);
@@ -107,6 +130,22 @@ export default function Calendar() {
   //   const calendar = document.querySelector('.calendar');
   //   calendar.classList.add('hidden');
   // });
+
+  calendarNav.addEventListener('click', e => {
+    if (
+      e.target.tagName === 'BOX-ICON' &&
+      e.target.getAttribute('name') === 'left-arrow'
+    ) {
+      store.setState({ counter: store.getState().counter - 1 });
+      updatedCalendar();
+    } else if (
+      e.target.tagName === 'BOX-ICON' &&
+      e.target.getAttribute('name') === 'right-arrow'
+    ) {
+      store.setState({ counter: store.getState().counter + 1 });
+      updatedCalendar();
+    }
+  });
 
   return calendarSection;
 }
