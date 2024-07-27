@@ -17,6 +17,10 @@ h3 {
     font-size: calc(var(--calendar-size) * 0.5);
 }
 
+section {
+    height: 100vh;
+}
+
 section > input {
     height: 20px;
     font-size: calc(var(--calendar-size) / 5);
