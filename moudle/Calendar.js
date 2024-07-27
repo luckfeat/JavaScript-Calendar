@@ -37,27 +37,43 @@ export function getDateDifference(startDate, endDate) {
 export function getStartAndLastDate() {
   const [month, year] = getMonthAndYear();
 
-  /* This Month */
   const firstDay = new Date(year, month).getDay();
   const lastDay = new Date(year, month + 1, 0).getDay();
 
-  /* Previous, Next Month */
-  const previousMonthDate = new Date(year, month, 1 - firstDay);
-  const nextMonthDate = new Date(year, month + 1, 7 - (lastDay + 1));
+  const previousMonth = new Date(year, month, 1 - firstDay);
+  const nextMonth = new Date(year, month + 1, 7 - (lastDay + 1));
 
-  /* 달력에 추가될 요일 계산 */
-  const dateDifference = getDateDifference(previousMonthDate, nextMonthDate);
-  const startDate = previousMonthDate;
-  const lastDate = nextMonthDate.setDate(
-    nextMonthDate.getDate() + dateDifference
-  );
+  const dateDifference = getDateDifference(previousMonth, nextMonth);
+  const startDate = previousMonth;
+  const lastDate = nextMonth.setDate(nextMonth.getDate() + dateDifference);
 
   return [startDate, lastDate];
 }
 
+export function formatDate(date) {
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+
+  month = month < 10 ? '0' + month : month;
+  day = day < 10 ? '0' + day : day;
+
+  const formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+}
+
 export function renderDateElements(tag) {
+  const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const [month] = getMonthAndYear();
   const [startDate, lastDate] = getStartAndLastDate();
+
+  week.forEach(el => {
+    const day = document.createElement('div');
+    day.textContent = el;
+    day.className = 'calendar-week';
+    tag.appendChild(day);
+  });
 
   let currentDate = startDate;
 
@@ -70,7 +86,14 @@ export function renderDateElements(tag) {
         ? 'calendar-item'
         : 'calendar-item light';
 
+    if (
+      currentDate.toString().slice(0, 10) === new Date().toString().slice(0, 10)
+    ) {
+      dateGrid.classList.add('today');
+    }
+
     dateGrid.textContent = dayOfDate.toString();
+    dateGrid.dataset.Date = formatDate(currentDate);
     tag.appendChild(dateGrid);
     currentDate.setDate(currentDate.getDate() + 1);
   }
@@ -111,22 +134,23 @@ export default function Calendar() {
 
   calendarSection.innerHTML = calendarInnerHtml;
 
+  const calendar = calendarSection.querySelector('.calendar');
   const calendarInput = calendarSection.querySelector('input');
   const calendarNav = calendarSection.querySelector('.calendar-nav');
   const calendarContent = calendarSection.querySelector('.calendar-content');
 
   renderDateElements(calendarContent);
 
+  let selectedDate;
+
+  calendarSection.addEventListener('click', e => {
+    if (e.target.tagName === 'SECTION') {
+      calendar.classList.add('hidden');
+    }
+  });
   calendarInput.addEventListener('click', () => {
-    const calendar = document.querySelector('.calendar');
     calendar.classList.remove('hidden');
   });
-
-  // calendarInput.addEventListener('blur', () => {
-  //   const calendar = document.querySelector('.calendar');
-  //   calendar.classList.add('hidden');
-  // });
-
   calendarNav.addEventListener('click', e => {
     if (
       e.target.tagName === 'BOX-ICON' &&
@@ -140,6 +164,18 @@ export default function Calendar() {
     ) {
       store.setState({ counter: store.getState().counter + 1 });
       updatedCalendar();
+    }
+  });
+  calendarContent.addEventListener('click', e => {
+    if (
+      e.target.className === 'calendar-item' ||
+      e.target.className === 'calendar-item today'
+    ) {
+      calendarInput.placeholder = e.target.dataset.Date;
+      selectedDate?.classList.remove('selected');
+      selectedDate = e.target;
+      e.target.classList.add('selected');
+      calendar.classList.add('hidden');
     }
   });
 
